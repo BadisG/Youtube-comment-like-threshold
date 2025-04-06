@@ -33,16 +33,17 @@
 
         const uiContainer = document.createElement('div');
         uiContainer.style.cssText = `
-            display: inline-flex;
-            align-items: center;
-            vertical-align: middle;
-            white-space: nowrap;
-            position: absolute;
-            left: calc(10vw + 60px);
-            padding: 5px 3px;
-            border-radius: 5px;
-            box-sizing: border-box;
-        `;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    position: absolute;
+    left: calc(10vw + 60px);
+    padding: 5px 3px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    width: 152px;
+`;
 
         const labelText = document.createElement('span');
         labelText.textContent = 'Min Likes:';
@@ -83,7 +84,7 @@
         const upButton = document.createElement('button');
         upButton.textContent = '▲';
         upButton.style.cssText = `
-    width: 100%;
+    width: 200%;
     flex: 1;
     padding: 0;
     font-size: 10px;
@@ -102,7 +103,7 @@
         const downButton = document.createElement('button');
         downButton.textContent = '▼';
         downButton.style.cssText = `
-    width: 100%;
+    width: 200%;
     flex: 1;
     padding: 0;
     font-size: 10px;
