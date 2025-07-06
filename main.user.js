@@ -7,6 +7,15 @@
 // @grant none
 // ==/UserScript==
 
+// ==UserScript==
+// @name YouTube Comment Filter (With Adjustable Threshold)
+// @namespace http://tampermonkey.net/
+// @version 1.0
+// @description Filter YouTube comments with less than X likes, with adjustable threshold
+// @match https://www.youtube.com/*
+// @grant none
+// ==/UserScript==
+
 (function() {
     'use strict';
 
@@ -26,23 +35,32 @@
 
     function insertUIElements() {
         const logoContainer = document.querySelector('ytd-topbar-logo-renderer');
-        if (!logoContainer) {
+        const centerContainer = document.querySelector('#center.style-scope.ytd-masthead');
+
+        if (!logoContainer || !centerContainer) {
             setTimeout(insertUIElements, 1000);
             return;
         }
 
+        // Check if UI already exists
+        if (document.querySelector('#comment-filter-ui')) {
+            return;
+        }
+
         const uiContainer = document.createElement('div');
+        uiContainer.id = 'comment-filter-ui';
         uiContainer.style.cssText = `
     display: inline-flex;
     align-items: center;
     vertical-align: middle;
     white-space: nowrap;
-    position: absolute;
-    left: calc(10vw + 60px);
-    padding: 5px 3px;
+    padding: 5px 8px;
     border-radius: 5px;
     box-sizing: border-box;
-    width: 152px;
+    width: 160px;
+    margin-right: 12px;
+    margin-left: 20px;  // Add this line
+    flex-shrink: 0;
 `;
 
         const labelText = document.createElement('span');
@@ -72,51 +90,53 @@
         // Create buttons container for vertical stacking
         const buttonsContainer = document.createElement('div');
         buttonsContainer.style.cssText = `
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 24px;
-    width: 18px;
-    margin-left: 2px;
-    align-self: center;
-`;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 24px;
+            width: 18px;
+            margin-left: 2px;
+            align-self: center;
+        `;
+
         // Create up button
         const upButton = document.createElement('button');
         upButton.textContent = '▲';
         upButton.style.cssText = `
-    width: 200%;
-    flex: 1;
-    padding: 0;
-    font-size: 10px;
-    line-height: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 3px 3px 0 0;
-    cursor: pointer;
-    margin: 0;
-    border: none;
-    box-sizing: border-box;
-`;
+            width: 200%;
+            flex: 1;
+            padding: 0;
+            font-size: 10px;
+            line-height: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            margin: 0;
+            border: none;
+            box-sizing: border-box;
+        `;
 
         // Create down button
         const downButton = document.createElement('button');
         downButton.textContent = '▼';
         downButton.style.cssText = `
-    width: 200%;
-    flex: 1;
-    padding: 0;
-    font-size: 10px;
-    line-height: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0 0 3px 3px;
-    cursor: pointer;
-    margin: 0;
-    border: none;
-    box-sizing: border-box;
-`;
+            width: 200%;
+            flex: 1;
+            padding: 0;
+            font-size: 10px;
+            line-height: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 0 3px 3px;
+            cursor: pointer;
+            margin: 0;
+            border: none;
+            box-sizing: border-box;
+        `;
+
         // Add buttons to the container
         buttonsContainer.appendChild(upButton);
         buttonsContainer.appendChild(downButton);
@@ -124,7 +144,21 @@
         uiContainer.appendChild(labelText);
         uiContainer.appendChild(inputBox);
         uiContainer.appendChild(buttonsContainer);
-        logoContainer.parentNode.insertBefore(uiContainer, logoContainer.nextSibling);
+
+        // Insert the UI before the center container (search area)
+        centerContainer.parentNode.insertBefore(uiContainer, centerContainer);
+
+        // Modify the center container to accommodate the new element
+        centerContainer.style.marginLeft = '0px';
+        centerContainer.style.flex = '1';
+        centerContainer.style.minWidth = '0';
+
+        // Make the search box more flexible
+        const searchBox = centerContainer.querySelector('yt-searchbox');
+        if (searchBox) {
+            searchBox.style.maxWidth = 'none';
+            searchBox.style.width = '100%';
+        }
 
         // Event listeners
         inputBox.addEventListener('input', applyNewValue);
