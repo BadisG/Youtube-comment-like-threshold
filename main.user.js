@@ -1,16 +1,7 @@
 // ==UserScript==
 // @name YouTube Comment Filter (With Adjustable Threshold)
 // @namespace http://tampermonkey.net/
-// @version 1.0
-// @description Filter YouTube comments with less than X likes, with adjustable threshold
-// @match https://www.youtube.com/*
-// @grant none
-// ==/UserScript==
-
-// ==UserScript==
-// @name YouTube Comment Filter (With Adjustable Threshold)
-// @namespace http://tampermonkey.net/
-// @version 1.0
+// @version 1.1
 // @description Filter YouTube comments with less than X likes, with adjustable threshold
 // @match https://www.youtube.com/*
 // @grant none
@@ -59,7 +50,7 @@
     box-sizing: border-box;
     width: 160px;
     margin-right: 12px;
-    margin-left: 20px;  // Add this line
+    margin-left: 20px;
     flex-shrink: 0;
 `;
 
@@ -87,7 +78,6 @@
             margin-right: 2px;
         `;
 
-        // Create buttons container for vertical stacking
         const buttonsContainer = document.createElement('div');
         buttonsContainer.style.cssText = `
             display: flex;
@@ -99,7 +89,6 @@
             align-self: center;
         `;
 
-        // Create up button
         const upButton = document.createElement('button');
         upButton.textContent = '▲';
         upButton.style.cssText = `
@@ -118,7 +107,6 @@
             box-sizing: border-box;
         `;
 
-        // Create down button
         const downButton = document.createElement('button');
         downButton.textContent = '▼';
         downButton.style.cssText = `
@@ -137,7 +125,6 @@
             box-sizing: border-box;
         `;
 
-        // Add buttons to the container
         buttonsContainer.appendChild(upButton);
         buttonsContainer.appendChild(downButton);
 
@@ -145,22 +132,18 @@
         uiContainer.appendChild(inputBox);
         uiContainer.appendChild(buttonsContainer);
 
-        // Insert the UI before the center container (search area)
         centerContainer.parentNode.insertBefore(uiContainer, centerContainer);
 
-        // Modify the center container to accommodate the new element
         centerContainer.style.marginLeft = '0px';
         centerContainer.style.flex = '1';
         centerContainer.style.minWidth = '0';
 
-        // Make the search box more flexible
         const searchBox = centerContainer.querySelector('yt-searchbox');
         if (searchBox) {
             searchBox.style.maxWidth = 'none';
             searchBox.style.width = '100%';
         }
 
-        // Event listeners
         inputBox.addEventListener('input', applyNewValue);
 
         upButton.addEventListener('click', () => {
@@ -177,10 +160,8 @@
             }
         });
 
-        // Apply theme-specific styles
         applyThemeStyles(uiContainer, labelText, inputBox, upButton, downButton);
 
-        // Add a listener for theme changes
         const observer = new MutationObserver(() => {
             applyThemeStyles(uiContainer, labelText, inputBox, upButton, downButton);
         });
@@ -195,23 +176,18 @@
             input.style.backgroundColor = 'white';
             input.style.color = '#0f0f0f';
             input.style.border = '1px solid rgba(0, 0, 0, 0.6)';
-
-            // Button light theme
             [upButton, downButton].forEach(btn => {
                 btn.style.backgroundColor = '#f5f5f5';
                 btn.style.color = '#0f0f0f';
                 btn.style.border = '1px solid rgba(0, 0, 0, 0.6)';
             });
         } else {
-            // Dark mode changes
             container.style.background = 'linear-gradient(to bottom right, black, #262626)';
             container.style.border = '1px solid rgba(255, 255, 255, 0.4)';
             label.style.color = 'white';
             input.style.backgroundColor = 'rgba(50, 50, 50, 0.7)';
             input.style.color = 'white';
             input.style.border = '1px solid rgba(255, 255, 255, 0.6)';
-
-            // Button dark theme
             [upButton, downButton].forEach(btn => {
                 btn.style.backgroundColor = 'rgba(60, 60, 60, 0.8)';
                 btn.style.color = 'white';
@@ -229,6 +205,9 @@
     function filterComments() {
         const comments = document.querySelectorAll('ytd-comment-thread-renderer');
         comments.forEach(comment => {
+            // Skip replies — they carry the is-sub-thread attribute
+            if (comment.hasAttribute('is-sub-thread')) return;
+
             const likeButton = comment.querySelector('#vote-count-middle');
             if (likeButton) {
                 const likeText = likeButton.textContent.trim();
@@ -250,7 +229,7 @@
         return parseInt(likeText);
     }
 
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(() => {
         filterComments();
     });
 
